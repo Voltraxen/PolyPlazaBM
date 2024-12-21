@@ -1,0 +1,274 @@
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poly Plaza Better Menu V0.1</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 50;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease-in-out;
+        }
+        .modal-content:hover {
+            transform: scale(1.05);
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .button {
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+        .button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="bg-white shadow-lg rounded-lg p-8 max-w-4xl w-full">
+        <h1 class="text-3xl font-bold text-center mb-6">Poly Plaza Better Menu V0.1</h1>
+        <div class="flex space-x-4 mb-4">
+            <button id="copyButton" class="bg-blue-500 text-white px-4 py-2 rounded flex items-center button">
+                <i class="fas fa-copy mr-2"></i> Copy
+            </button>
+            <button id="learnMoreButton" class="bg-green-500 text-white px-4 py-2 rounded flex items-center button">
+                <i class="fas fa-info-circle mr-2"></i> Learn more
+            </button>
+            <button id="discordButton" class="bg-purple-500 text-white px-4 py-2 rounded flex items-center button">
+                <i class="fab fa-discord mr-2"></i> Discord
+            </button>
+            <button id="makeFriendButton" class="bg-yellow-500 text-white px-4 py-2 rounded flex items-center button">
+                <img src="https://makeafriend.gg/images/happy-face-2-yellow.svg" alt="Happy face icon in yellow" class="mr-2 w-5 h-5"> Make A Friend
+            </button>
+        </div>
+        <div class="bg-gray-200 p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+            <pre class="whitespace-pre-wrap text-sm">
+MainMenu = CreateUI()
+local Steam = GetSteamAPI()
+local is_first_time_opening_menu = true
+
+local Username = { 
+    anchor = { min = { x = 0, y = 0.1 }, max = { x = 1, y = 0.1 } }, 
+    align = "center", 
+    type = "text" 
+}
+
+local Play_Button = { 
+    text = "Play", 
+    click = "Resume", 
+    font_size = 20, 
+    type = "button" 
+}
+
+local Respawn_Button = { 
+    text = "Respawn", 
+    click = "MainMenuRespawn", 
+    font_size = 20, 
+    type = "button" 
+}
+
+local Save_Button = { 
+    text = "Save", 
+    click = "SaveGame", 
+    font_size = 20, 
+    type = "button" 
+}
+
+local Settings_Button = { 
+    text = "Settings", 
+    click = "OpenSettings", 
+    font_size = 20, 
+    type = "button" 
+}
+
+local QuitGame_Button = { 
+    text = "Quit", 
+    click = "Quit", 
+    font_size = 20, 
+    type = "button" 
+}
+
+local Discord_Button = { 
+    text = "Discord", 
+    click = "OpenDiscord", 
+    font_size = 20, 
+    type = "button" 
+}
+--ce bouton marche pa car je suis trop con ca race
+local Money_Button = {
+    text = "Money",
+    click = "GiveMoney",
+    font_size = 20,
+    type = "button"
+}
+
+local Menu = { 
+    type = "vertical_box", 
+    anchor = { min = { x = 0.3, y = 0.3 }, max = { x = 0.7, y = 0.7 } }, 
+    children = { 
+        { 
+            text = "Poly Plaza 1.4 BETA", 
+            type = "text", 
+            font_size = 40, 
+            font = "Poppins-Bold", -- Ajout de la police Poppins Bold
+            margin = { bottom = 50 } 
+        }, 
+        Play_Button, 
+        Settings_Button, 
+        QuitGame_Button 
+    } 
+}
+
+MainMenu.ui = { Username, Menu }
+
+function MainMenuRespawn() 
+    Respawn() 
+    Resume() 
+end
+--attention celui la il fait crash le jeux (parfois) mais pas grave
+function OpenDiscord()
+    local discordLink = "https://discord.gg/89fgvZEnmx"
+    if _G.OpenURL and type(_G.OpenURL) == "function" then
+        _G.OpenURL(discordLink)
+        return
+    end
+    if Steam and Steam.OpenURL and type(Steam.OpenURL) == "function" then
+        Steam:OpenURL(discordLink)
+        return
+    end
+    if os and os.execute then
+        local command
+        if package.config:sub(1,1) == '\\' then
+            command = string.format('start %s', discordLink)
+        else
+            command = string.format('xdg-open %s || open %s', discordLink, discordLink)
+        end
+        os.execute(command)
+        return
+    end
+    print("Could not open Discord link. Please visit: " .. discordLink)
+end
+
+function GiveMoney()
+    local player = GetLocalPlayer() -- Obtient le joueur local
+    if player then
+        if player GetMoney and player AddMoney then
+            local money = player:GetMoney() or 0
+            player:AddMoney(1000000)
+            print("You have been given 1,000,000 money! New balance: " .. (money + 1000000))
+        else
+            print("Error: The player object does not have GetMoney or AddMoney methods.")
+        end
+    else
+        print("No player found to give money.")
+    end
+end
+
+function OnOpenMainMenu() 
+    Username.text = "Welcome back, " .. Steam:GetUsername() .. "!" 
+    
+    if is_first_time_opening_menu == false then
+        Menu.children = { 
+            { 
+                text = "Poly Plaza 1.4 BETA", 
+                type = "text", 
+                font_size = 40, 
+                font = "Poppins-Bold", 
+                margin = { bottom = 50 } 
+            }, 
+            Play_Button, 
+            Respawn_Button, 
+            Save_Button, 
+            Settings_Button, 
+            Money_Button, -- Ajout du bouton Money
+            Discord_Button, 
+            QuitGame_Button 
+        } 
+    end
+    
+    MainMenu:Show() 
+    is_first_time_opening_menu = false 
+end
+
+function OnCloseMainMenu() 
+    MainMenu:Hide() 
+end
+            </pre>
+            <p class="text-center mt-4 italic">"Pretty cool hein - Victor 2023"</p>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="learnMoreModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p>This menu created with ❤️ by Voltraxen but feel free to take the code and make upgrade on this menu to make it feel your needs, if you need help go check the official poly plaza doc here -> <a href="https://toolkit.victorgamestudio.com/introduction" target="_blank" class="text-blue-500 underline">https://toolkit.victorgamestudio.com/introduction</a></p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('copyButton').addEventListener('click', function() {
+            const codeBlock = document.querySelector('pre').innerText;
+            navigator.clipboard.writeText(codeBlock).then(function() {
+                alert('Code copied to clipboard!');
+            }, function(err) {
+                console.error('Could not copy text: ', err);
+            });
+        });
+
+        document.getElementById('learnMoreButton').addEventListener('click', function() {
+            document.getElementById('learnMoreModal').style.display = "block";
+        });
+
+        document.getElementById('discordButton').addEventListener('click', function() {
+            window.open('https://discord.gg/89fgvZEnmx', '_blank');
+        });
+
+        document.getElementById('makeFriendButton').addEventListener('click', function() {
+            window.open('https://discord.gg/PUJDTP8x6J', '_blank');
+        });
+
+        document.querySelector('.close').addEventListener('click', function() {
+            document.getElementById('learnMoreModal').style.display = "none";
+        });
+
+        window.addEventListener('click', function(event) {
+            if (event.target == document.getElementById('learnMoreModal')) {
+                document.getElementById('learnMoreModal').style.display = "none";
+            }
+        });
+    </script>
+</body>
+</html>
